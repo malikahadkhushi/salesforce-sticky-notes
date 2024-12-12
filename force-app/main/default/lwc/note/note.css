@@ -1,0 +1,43 @@
+.card {
+   height: 200px;
+   width: 300px;
+   background-color: bisque;
+   display: flex;
+   border-radius: 10px;
+   flex-direction: column;  
+   padding: 10px 15px; 
+   position: relative;
+
+}
+
+.actions{
+   display:  flex;
+   width: 100%;
+   justify-content: space-between;
+}
+.icons{
+display: flex;
+gap: 5px;
+}
+.icon{
+   transition: all 0.3s ease-in-out;
+   font-size: 14px;
+}
+.icon:hover {
+   transform: scale(1.2);
+   cursor: pointer;
+}
+.note-title{
+   font-size: 16px;
+   font-weight: 700;
+}
+
+.note-description {
+   font-size: 14px;
+}
+
+.date{
+display: flex;
+position: absolute;
+bottom: 10px;
+}

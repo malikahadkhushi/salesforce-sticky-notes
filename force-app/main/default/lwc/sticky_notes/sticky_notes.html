@@ -1,0 +1,34 @@
+<template>
+   <div class="note-container">
+      <div>
+         <lightning-button-icon class="create-note-button slds-grid slds-grid_align-end" icon-name="utility:add"
+            alternative-text="Add Note" variant="bare" onclick={openModal}>
+         </lightning-button-icon>
+      </div>
+
+      <div class="notes">
+         <div class="note-cards slds-m-top_x-small">
+            <template for:each={stickyNotes} for:item="note">
+               <c-note key={note.ownerId} note={note} ondelete={handleDeleteNote} onedit={handleEditNote}></c-note>
+            </template>
+         </div>
+      </div>
+
+      <div>
+         <template if:false={stickyNotes.length}>
+            <p class="no-sticky-notes">No Notes</p>
+         </template>
+      </div>
+
+      <!-- Include modal -->
+      <template if:true={isModalOpen}>
+         <c-note-modal is-open={isModalOpen} onclose={closeModal} onsave={handleSaveNote} is-update={isUpdate}
+            note={note}>
+         </c-note-modal>
+      </template>
+
+      <template if:true={isLoading}>
+         <lightning-spinner size="small" variant="brand"></lightning-spinner>
+      </template>
+   </div>
+</template>

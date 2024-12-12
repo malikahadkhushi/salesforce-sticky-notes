@@ -1,0 +1,40 @@
+<template>
+   <template if:true={isOpen}>
+      <section class="slds-modal slds-fade-in-open">
+         <div class="slds-modal__container">
+            <header class="slds-modal__header">
+               <h2 class="slds-text-heading_medium">{modalHeading}</h2>
+               <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+                  onclick={handleClose}>
+                  <lightning-icon icon-name="utility:close" alternative-text="close" size="x-small"></lightning-icon>
+               </button>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+               <!-- Input Fields -->
+               <lightning-input type="text" label="Title*" value={noteTitle} onchange={handleInputChange}
+                  data-id="title"></lightning-input>
+               <lightning-textarea label="Description*" value={noteDescription} onchange={handleInputChange}
+                  data-id="description"></lightning-textarea>
+            </div>
+            <footer class="slds-modal__footer slds-grid slds-grid_vertical">
+               <template if:true={objectId}>
+                  <div class="slds-item slds-grid slds-align_absolute-left slds-m-bottom_small">
+                     <lightning-input type="checkbox" checked={isObject} disabled={isAllFill} label="Associate with current record"
+                        onchange={handleCheckboxChange}>
+                     </lightning-input>
+                  </div>
+               </template>
+
+               <div class="slds-item">
+                  <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
+                  <lightning-button class="slds-m-left_x-small" variant="brand" label="Save"
+                     onclick={handleSave}></lightning-button>
+               </div>
+            </footer>
+
+         </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+   </template>
+
+</template>

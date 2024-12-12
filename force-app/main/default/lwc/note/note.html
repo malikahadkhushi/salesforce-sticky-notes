@@ -1,0 +1,21 @@
+<template>
+   <div class="card">
+      <div class="header">
+         <div class="actions">
+            <p class="note-title">{note.Title__c}</p>
+            <div class="icons">
+               <lightning-icon class="icon" icon-name="utility:edit" alternative-text="Edit Note" size="xx-small"
+                  onclick={handleEdit}></lightning-icon>
+               <lightning-icon class="icon" icon-name="utility:delete" alternative-text="Delete Note" size="xx-small"
+                  onclick={handleDelete}></lightning-icon>
+            </div>
+         </div>
+      </div>
+      <div>
+         <p class="note-description">{note.Content__c}</p>
+      </div>
+      <div>
+         <p class="date">{note.CreatedDate}</p>
+      </div>
+   </div>
+</template>
