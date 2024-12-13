@@ -4,9 +4,9 @@ import { CurrentPageReference } from 'lightning/navigation';
 
 export default class NoteModal extends LightningElement {
 
-   @api isOpen = false;
    @api isUpdate = false;
    @api note = {};
+   @api isOpen;
 
    @track noteTitle = '';
    @track noteDescription = '';
@@ -23,8 +23,10 @@ export default class NoteModal extends LightningElement {
 
    connectedCallback() {
 
+      console.log("open in note modal", this.isOpen)
+
       const { title, content } = this.note;
-      
+
       if (title && content) {
          this.noteTitle = this.note.title || '';
          this.noteDescription = this.note.content || '';

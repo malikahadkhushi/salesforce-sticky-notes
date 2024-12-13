@@ -23,6 +23,14 @@ export default class Note extends LightningElement {
       this.dispatchEvent(editEvent);
    }
 
+   handleShare() {
+      const shareEvent = new CustomEvent('share', {
+         detail: this.note.Id
+      });
+
+      this.dispatchEvent(shareEvent);
+   }
+
    formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);

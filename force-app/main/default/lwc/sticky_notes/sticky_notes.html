@@ -1,15 +1,21 @@
 <template>
    <div class="note-container">
-      <div>
-         <lightning-button-icon class="create-note-button slds-grid slds-grid_align-end" icon-name="utility:add"
-            alternative-text="Add Note" variant="bare" onclick={openModal}>
-         </lightning-button-icon>
+      <div class="note-header">
+         <div>
+            <p class="heading">Sticky Notes</p>
+         </div>
+         <div>
+            <lightning-button-icon class="create-note-button slds-grid slds-grid_align-end" icon-name="utility:add"
+               alternative-text="Add Note" variant="bare" onclick={openModal}>
+            </lightning-button-icon>
+         </div>
       </div>
 
       <div class="notes">
          <div class="note-cards slds-m-top_x-small">
             <template for:each={stickyNotes} for:item="note">
-               <c-note key={note.ownerId} note={note} ondelete={handleDeleteNote} onedit={handleEditNote}></c-note>
+               <c-note key={note.ownerId} note={note} ondelete={handleDeleteNote} onedit={handleEditNote}
+                  onshare={openShareModal}></c-note>
             </template>
          </div>
       </div>
@@ -25,6 +31,12 @@
          <c-note-modal is-open={isModalOpen} onclose={closeModal} onsave={handleSaveNote} is-update={isUpdate}
             note={note}>
          </c-note-modal>
+      </template>
+
+      <!-- User Selection Modal -->
+      <template if:true={isSelectionModal}>
+         <c-user-selection-modal onclose={closeShareModal} note-id={noteId}
+            onsharenotes={handleShareNotes}></c-user-selection-modal>
       </template>
 
       <template if:true={isLoading}>

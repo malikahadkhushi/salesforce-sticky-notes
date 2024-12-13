@@ -10,7 +10,6 @@
                </button>
             </header>
             <div class="slds-modal__content slds-p-around_medium">
-               <!-- Input Fields -->
                <lightning-input type="text" label="Title*" value={noteTitle} onchange={handleInputChange}
                   data-id="title"></lightning-input>
                <lightning-textarea label="Description*" value={noteDescription} onchange={handleInputChange}
@@ -19,8 +18,8 @@
             <footer class="slds-modal__footer slds-grid slds-grid_vertical">
                <template if:true={objectId}>
                   <div class="slds-item slds-grid slds-align_absolute-left slds-m-bottom_small">
-                     <lightning-input type="checkbox" checked={isObject} disabled={isAllFill} label="Associate with current record"
-                        onchange={handleCheckboxChange}>
+                     <lightning-input type="checkbox" checked={isObject} disabled={isAllFill}
+                        label="Associate with current record" onchange={handleCheckboxChange}>
                      </lightning-input>
                   </div>
                </template>

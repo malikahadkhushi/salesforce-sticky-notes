@@ -6,8 +6,18 @@
 
 }
 
+.note-header{
+   display:  flex;
+   width: 100%;
+   justify-content: space-between;
+}
+
+.heading{
+   font-weight: bold;
+   font-size: 18px;
+}
 .notes {
-   border-radius: 10px;
+   border-radius: 3px;
    display: flex;
    width: 100%;
 }

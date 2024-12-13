@@ -6,16 +6,19 @@ import getNotes from '@salesforce/apex/StickyAppController.getNotes';
 import createNote from '@salesforce/apex/StickyAppController.createNote';
 import updateNote from '@salesforce/apex/StickyAppController.updateNote';
 import deleteNote from '@salesforce/apex/StickyAppController.deleteNote';
+import sharedNotes from '@salesforce/apex/StickyAppController.sharedNotes';
 
 export default class StickyNotes extends LightningElement {
+
    @track stickyNotes = [];
    @track isModalOpen = false;
+   @track isSelectionModal = false;
    @track isUpdate = false;
    @track isLoading = false;
    @track note = {};
 
    @track objectId;
-
+   @track noteId;
    @wire(CurrentPageReference)
    setCurrentPageReference(pageRef) {
       const newObjectId = pageRef?.attributes?.recordId;
@@ -28,6 +31,17 @@ export default class StickyNotes extends LightningElement {
    //  Open modal
    openModal() {
       this.isModalOpen = true;
+      console.log("open modal", this.isModalOpen);
+   }
+
+   openShareModal(event) {
+      const Id = event.detail;
+      this.noteId = Id;
+      this.isSelectionModal = true;
+   }
+
+   closeShareModal() {
+      this.isSelectionModal = false;
    }
 
    // Close modal
@@ -109,7 +123,7 @@ export default class StickyNotes extends LightningElement {
 
 
 
-   //    // Edit a note
+   // Edit a note
    handleEditNote(event) {
       const { title, content, Id, objectId } = event.detail;
       this.isUpdate = true;
@@ -120,6 +134,31 @@ export default class StickyNotes extends LightningElement {
          Id: Id,
          objectId: objectId
       }
+   }
+
+   // sharing notes handler
+
+   /**
+    * 
+    * @param {*} event 
+    * shared note comes from selection modal  
+    */
+   handleShareNotes(event) {
+
+      this.isLoading = true;
+      const sharedNote = event.detail;
+
+      sharedNotes({ data: sharedNote })
+         .then((result) => {
+            this.showToast('Success', 'Notes shared successfully!', 'success');
+         })
+         .catch((error) => {
+            const errorMessage = error?.body?.message || 'An unknown error occurred';
+            this.showToast('Error', `Failed to share notes: ${errorMessage}`, 'error');
+         })
+         .finally(() => {
+            this.isLoading = false;
+         });
    }
 
 
