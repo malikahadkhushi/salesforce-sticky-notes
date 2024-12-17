@@ -129,6 +129,8 @@ public with sharing class StickyAppController {
     // Method to create a new note
     @AuraEnabled
     public static Notes__c createNote(String title, String content, String objectId) {
+        System.debug('title'+title);
+        System.debug('content'+content);
         try {
             Notes__c newNote = new Notes__c(
                 Title__c = title,

@@ -1,39 +1,54 @@
 <template>
    <template if:true={isOpen}>
-      <section class="slds-modal slds-fade-in-open">
-         <div class="slds-modal__container">
-            <header class="slds-modal__header">
-               <h2 class="slds-text-heading_medium">{modalHeading}</h2>
-               <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
-                  onclick={handleClose}>
-                  <lightning-icon icon-name="utility:close" alternative-text="close" size="x-small"></lightning-icon>
-               </button>
-            </header>
-            <div class="slds-modal__content slds-p-around_medium">
-               <lightning-input type="text" label="Title*" value={noteTitle} onchange={handleInputChange}
-                  data-id="title"></lightning-input>
-               <lightning-textarea label="Description*" value={noteDescription} onchange={handleInputChange}
-                  data-id="description"></lightning-textarea>
-            </div>
-            <footer class="slds-modal__footer slds-grid slds-grid_vertical">
-               <template if:true={objectId}>
-                  <div class="slds-item slds-grid slds-align_absolute-left slds-m-bottom_small">
-                     <lightning-input type="checkbox" checked={isObject} disabled={isAllFill}
-                        label="Associate with current record" onchange={handleCheckboxChange}>
-                     </lightning-input>
-                  </div>
-               </template>
-
-               <div class="slds-item">
-                  <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
-                  <lightning-button class="slds-m-left_x-small" variant="brand" label="Save"
-                     onclick={handleSave}></lightning-button>
+      <!-- Modal -->
+      <section class="slds-modal slds-fade-in-open container">
+         <div class="note-container">
+            <!-- Modal Header -->
+            <header class="note-header">
+               <div class="note-color">
+                  <div>r</div>
+                  <div>g</div>
+                  <div>b</div>
                </div>
-            </footer>
+               <div class="btn">
+                  <!-- Show saving spinner -->
+                  <template if:true={isSaving}>
+                     <lightning-icon icon-name="utility:refresh" alternative-text="Saving..." size="x-small"
+                        class="spin"></lightning-icon>
+                  </template>
 
+                  <!-- Show tick icon after save -->
+                  <template if:true={isSaved}>
+                     <lightning-icon icon-name="utility:success" alternative-text="Saved" size="x-small"
+                        class="success-icon"></lightning-icon>
+                  </template>
+
+                  <button class="close-button" title="Close" onclick={handleClose}>
+                     <lightning-icon icon-name="utility:close" alternative-text="close" size="x-small"></lightning-icon>
+                  </button>
+               </div>
+            </header>
+
+            <!-- Modal Content -->
+            <div class="note-content">
+               <input class="title-input" type="text" value={noteTitle} name="title" placeholder="Take a title"
+                  data-id="title" oninput={handleInputChange} maxlength="50" />
+               <textarea class="note-textarea" placeholder="Take a note..." data-id="description"
+                  oninput={handleInputChange}>{noteDescription}</textarea>
+            </div>
+
+            <!-- Modal Footer -->
+            <template if:true={objectId}>
+               <footer class="note-footer">
+                  <lightning-input type="checkbox" checked={isObject} disabled={isAllFill}
+                     label="Associate with current record" onchange={handleCheckboxChange}>
+                  </lightning-input>
+               </footer>
+            </template>
          </div>
       </section>
+
+      <!-- Backdrop -->
       <div class="slds-backdrop slds-backdrop_open"></div>
    </template>
-
 </template>

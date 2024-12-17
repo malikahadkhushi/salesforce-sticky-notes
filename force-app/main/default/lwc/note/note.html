@@ -1,11 +1,9 @@
 <template>
-   <div class="card">
+   <div ondblclick={handleEdit} class="card">
       <div class="header">
          <div class="actions">
             <p class="note-title">{note.Title__c}</p>
             <div class="icons">
-               <lightning-icon class="icon" icon-name="utility:edit" alternative-text="Edit Note" size="xx-small"
-                  onclick={handleEdit}></lightning-icon>
                <lightning-icon class="icon" icon-name="utility:delete" alternative-text="Delete Note" size="xx-small"
                   onclick={handleDelete}></lightning-icon>
                <lightning-icon class="icon" icon-name="utility:groups" alternative-text="Share Note" size="xx-small"

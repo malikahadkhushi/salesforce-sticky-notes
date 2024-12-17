@@ -14,7 +14,7 @@
       <div class="notes">
          <div class="note-cards slds-m-top_x-small">
             <template for:each={stickyNotes} for:item="note">
-               <c-note key={note.ownerId} note={note} ondelete={handleDeleteNote} onedit={handleEditNote}
+               <c-note onedit={handleEditNote} key={note.ownerId} note={note} ondelete={handleDeleteNote}
                   onshare={openShareModal}></c-note>
             </template>
          </div>
@@ -29,7 +29,7 @@
       <!-- Include modal -->
       <template if:true={isModalOpen}>
          <c-note-modal is-open={isModalOpen} onclose={closeModal} onsave={handleSaveNote} is-update={isUpdate}
-            note={note}>
+            note={note} note-id={noteId}>
          </c-note-modal>
       </template>
 

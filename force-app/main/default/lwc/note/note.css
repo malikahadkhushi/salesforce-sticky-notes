@@ -1,8 +1,7 @@
 .card {
-   height: fit-content;
-   max-height: 65px;
+   height: 70px;
    width: 290px;
-   background-color: bisque;
+   background-color: #fff9c4;
    display: flex;
    border-radius: 3px;
    flex-direction: column;  
@@ -49,7 +48,12 @@ transition: opacity 0.3s ease, visibility 0.3s ease;
 
 .note-title{
    font-size: 16px;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   width: 100%;
    font-weight: 700;
+   white-space: nowrap;
+
 }
 .description{
    height: 100%;
