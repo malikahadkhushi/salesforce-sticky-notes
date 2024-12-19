@@ -18,7 +18,7 @@ export default class StickyNotes extends LightningElement {
    @track note = {};
 
    @track objectId;
-   @track noteId;
+   @track noteId; // use to store created note id 
    @wire(CurrentPageReference)
    setCurrentPageReference(pageRef) {
       const newObjectId = pageRef?.attributes?.recordId;
@@ -50,6 +50,7 @@ export default class StickyNotes extends LightningElement {
       this.isModalOpen = false;
       this.isUpdate = false;
       this.note = {};
+      this.noteId = null
 
       if (!title.trim()) {
          await this.deleteHandler(Id)
@@ -76,7 +77,7 @@ export default class StickyNotes extends LightningElement {
 
    async createNoteHandler() {
       try {
-         const note = await createNote({ title: "", content: "", objectId: this.objectId || "" });
+         const note = await createNote({ title: "", content: "", objectId: this.objectId || "", code: "#ffeaa7" });
          this.noteId = note.Id;
       } catch (error) {
          console.log("Error", error?.message,);
@@ -97,10 +98,10 @@ export default class StickyNotes extends LightningElement {
 
    // Save note on input after some time interval
    async handleSaveNote(event) {
-      const { title, description, objectId } = event.detail;
+      const { title, description, objectId, code } = event.detail;
       try {
          if (this.isUpdate || title || description) {
-            await updateNote({ Id: this.noteId || this.note.Id, title, content: description, objectId });
+            await updateNote({ Id: this.noteId || this.note.Id, title, content: description, objectId, code });
          }
       } catch (error) {
          this.showToast('Error', 'Failed to update note: ' + error?.body?.message, 'error');
@@ -115,7 +116,7 @@ export default class StickyNotes extends LightningElement {
 
    // Edit a note
    handleEditNote(event) {
-      const { title, content, Id, objectId } = event.detail;
+      const { title, content, Id, objectId, color } = event.detail;
       this.isUpdate = true;
 
       this.isModalOpen = true;
@@ -123,7 +124,8 @@ export default class StickyNotes extends LightningElement {
          title: title,
          content: content,
          Id: Id,
-         objectId: objectId
+         objectId: objectId,
+         color: color
       }
    }
 
@@ -152,6 +154,20 @@ export default class StickyNotes extends LightningElement {
          });
    }
 
+   async handleChangeColor(event) {
+      try {
+         const data = event.detail;
+         const response = await updateNote({
+            Id: this.noteId || this.note.Id,
+            title: data.title,
+            content: data.description,
+            objectId: data.objectId,
+            code: data.code
+         });
+      } catch (error) {
+         console.log("Error", error);
+      }
+   }
 
    showToast(title, message, variant) {
       const event = new ShowToastEvent({

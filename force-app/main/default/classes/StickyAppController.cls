@@ -11,7 +11,7 @@ public with sharing class StickyAppController {
             if (String.isNotBlank(objectId)) {
                 // Query owned notes
                 List<Notes__c> ownedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c
+                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
                     FROM Notes__c
                     WHERE OwnerId = :ownerId AND ObjectId__c = :objectId
                     ORDER BY CreatedDate DESC
@@ -19,7 +19,7 @@ public with sharing class StickyAppController {
             
                 // Query shared notes
                 List<Notes__c> sharedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c
+                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
                     FROM Notes__c
                     WHERE Id IN (
                         SELECT Note__c
@@ -67,7 +67,7 @@ public with sharing class StickyAppController {
             } else {
                 // Query owned notes
                 List<Notes__c> ownedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c
+                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
                     FROM Notes__c
                     WHERE OwnerId = :ownerId
                     ORDER BY CreatedDate DESC
@@ -75,7 +75,7 @@ public with sharing class StickyAppController {
             
                 // Query shared notes
                 List<Notes__c> sharedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c
+                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
                     FROM Notes__c
                     WHERE Id IN (
                         SELECT Note__c
@@ -128,14 +128,15 @@ public with sharing class StickyAppController {
 
     // Method to create a new note
     @AuraEnabled
-    public static Notes__c createNote(String title, String content, String objectId) {
+    public static Notes__c createNote(String title, String content, String objectId,String code) {
         System.debug('title'+title);
         System.debug('content'+content);
         try {
             Notes__c newNote = new Notes__c(
                 Title__c = title,
                 Content__c = content,
-                ObjectId__c = objectId
+                ObjectId__c = objectId,
+                Color_Code__c = code
             );
             insert newNote;
             return newNote;
@@ -146,12 +147,13 @@ public with sharing class StickyAppController {
 
     // Method to update an existing note
     @AuraEnabled
-    public static Notes__c updateNote(Id Id, String title, String content, String objectId) {
+    public static Notes__c updateNote(Id Id, String title, String content, String objectId, String code) {
         try {
             Notes__c noteToUpdate = [SELECT Id FROM Notes__c WHERE Id = :Id];
             noteToUpdate.Title__c = title;
             noteToUpdate.Content__c = content;
             noteToUpdate.ObjectId__c = objectId;
+            noteToUpdate.Color_Code__c = code ;
             update noteToUpdate;
             return noteToUpdate;
         } catch (Exception e) {

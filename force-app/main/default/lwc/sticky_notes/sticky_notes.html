@@ -29,7 +29,7 @@
       <!-- Include modal -->
       <template if:true={isModalOpen}>
          <c-note-modal is-open={isModalOpen} onclose={closeModal} onsave={handleSaveNote} is-update={isUpdate}
-            note={note} note-id={noteId}>
+            note={note} oncolorselect={handleChangeColor} note-id={noteId}>
          </c-note-modal>
       </template>
 

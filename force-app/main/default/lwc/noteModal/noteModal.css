@@ -6,7 +6,6 @@
    align-items: center;
 }
 .note-container {
-   background-color: #fff9c4;
    border-radius: 5px;
    width: 400px;
    min-height: 250px;
@@ -15,19 +14,25 @@
 }
 
 .note-header {
-   background-color: #f1e573;
    border-bottom: none;
    padding: 0.5rem;
    display: flex;
    justify-content: space-between;
    align-items: center;
    border-radius: 5px 5px 0px 0px;
+   border-bottom: 0.2px rgba(67, 66, 66, 0.1) solid;
+
+}
+.colors {
+   height: 12px;
+    width: 12px;
+    border-radius :100%;
 
 }
 
 .note-color{
    display: flex;
-   gap: 3px;
+   gap: 6px;
 }
 
 .close-button{
@@ -66,8 +71,7 @@
 }
 
 .note-footer {
-   border-top: rgb(159, 153, 153) 0.5px solid;
-   background-color: #fff9c4;
+   border-top: 0.2px rgba(67, 66, 66, 0.1) solid;
    padding: 0.7rem;
    display: flex;
    justify-content: space-between;
@@ -90,5 +94,5 @@
 }
 
 .success-icon {
-   color: green;
+   --sds-c-icon-color-foreground: green; /* Set the icon color */
 }
