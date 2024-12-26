@@ -5,12 +5,11 @@ export default class UserSelectionModal extends LightningElement {
 
    @track users = [];
    @track selectedUsers = [];
+   @track isDisabled = true;
+   @track isLoading = false;
 
    @api noteId;
 
-   columns = [
-      { label: 'Name', fieldName: 'Name', type: 'text' },
-   ];
 
    connectedCallback() {
       this.fetchUsers();
@@ -22,20 +21,27 @@ export default class UserSelectionModal extends LightningElement {
       this.selectedUsers = []
    }
 
-   handleRowSelection(event) {
+   handleCheckboxChange(event) {
+      const Id = event.target.value;
 
-      const selectedRows = event.detail.selectedRows;
-      this.selectedUsers = selectedRows.map(row => row.Id);
+      this.selectedUsers.includes(Id) ?
+         this.selectedUsers = this.selectedUsers.filter(user => user !== Id) :
+         this.selectedUsers.push(Id);
+
+      this.selectedUsers.length > 0 ? this.isDisabled = false : this.isDisabled = true;
 
    }
 
    // Fetch Users from Apex Controller
    fetchUsers() {
+      this.isLoading = true;
       getUsers()
          .then(result => {
             this.users = result;
+            this.isLoading = false;
          })
          .catch(error => {
+            this.isLoading = false;
             console.error('Error fetching users:', error);
          });
    }

@@ -1,18 +1,3 @@
-// public with sharing class Color {
-//     public Color() {}
-
-//     // get All colors
-//     @AuraEnabled
-//     public static List<Colors__c> getColors(){
-//         try {
-//             List<Colors__c> colors = [SELECT Name from Colors__c];
-//             return colors;
-//         } catch (Exception e) {
-//             throw new AuraHandledException(e.getMessage());
-//         }
-//     }
-// }
-
 public with sharing class Color {
     @AuraEnabled
     public static List<Map<String, String>> getColors() {

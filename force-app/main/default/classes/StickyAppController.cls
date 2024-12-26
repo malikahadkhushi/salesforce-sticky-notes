@@ -125,12 +125,9 @@ public with sharing class StickyAppController {
         }
     }
     
-
     // Method to create a new note
     @AuraEnabled
     public static Notes__c createNote(String title, String content, String objectId,String code) {
-        System.debug('title'+title);
-        System.debug('content'+content);
         try {
             Notes__c newNote = new Notes__c(
                 Title__c = title,
@@ -165,20 +162,53 @@ public with sharing class StickyAppController {
     @AuraEnabled
     public static void deleteNote(Id Id) {
         try {
+            Id ownerId = UserInfo.getUserId();
+            SharedNote__c sharedNote = [SELECT Id FROM SharedNote__c WHERE Note__c = :Id AND User__c = :ownerId];
             Notes__c record= [SELECT Id FROM Notes__c WHERE Id = :Id];
-            delete record;
+            if(sharedNote != null){
+                delete sharedNote;
+            }else{
+                delete record;
+            }
         } catch (Exception e) {
             throw new AuraHandledException('Error deleting note: ' + e.getMessage());
         }
     }
 
-
     @AuraEnabled
     public static List<User> getUsers(){
         try {
         Id ownerId = UserInfo.getUserId();
-            List<User> users = [SELECT Id, Name, Email FROM User WHERE IsActive = TRUE AND Id != :ownerId];
-            return users;
+
+        Map<Id, String> profileToLicenseMap = new Map<Id, String>();
+
+        List<Profile> profiles = [
+            SELECT Id,Name, UserLicense.Name 
+            FROM Profile
+        ];
+
+        for (Profile profile :profiles) { 
+            profileToLicenseMap.put(profile.Id, profile.UserLicense.Name);
+        }
+
+        List<User> users = [
+            SELECT Id, Name, Email, ProfileId 
+            FROM User 
+            WHERE IsActive = TRUE 
+            AND Id != :ownerId
+        ];
+
+        List<User> filterUsers = new List<User>();
+
+        // Attach license information to each user
+        for (User user : users) {
+            String license = profileToLicenseMap.get(user.ProfileId);
+            if(license == 'Salesforce' || license == 'Salesforce Platform' || license == 'Salesforce integration'){
+                filterUsers.add(user);
+            }
+        }
+        System.debug('filterUsers'+filterUsers);
+         return filterUsers;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
@@ -198,13 +228,9 @@ public with sharing class StickyAppController {
             }
     
             insert sharedNotesToInsert;
-                return sharedNotesToInsert;
+            return sharedNotesToInsert;
         } catch (Exception e) {
-            // Log the error and throw an AuraHandledException for the client
-            System.debug('Error while sharing notes: ' + e.getMessage());
             throw new AuraHandledException('Error while sharing notes: ' + e.getMessage());
         }
-    }
-    
-    
+    }   
 }
