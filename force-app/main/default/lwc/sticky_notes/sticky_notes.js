@@ -1,6 +1,7 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CurrentPageReference } from 'lightning/navigation';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
 import getNotes from '@salesforce/apex/StickyAppController.getNotes';
 import createNote from '@salesforce/apex/StickyAppController.createNote';
@@ -10,15 +11,23 @@ import sharedNotes from '@salesforce/apex/StickyAppController.sharedNotes';
 
 export default class StickyNotes extends LightningElement {
 
-   @track stickyNotes = [];
+   _stickyNotes = [];
    @track isModalOpen = false;
    @track isSelectionModal = false;
    @track isUpdate = false;
    @track isLoading = false;
    @track note = {};
 
+
+
    @track objectId;
    @track noteId; // use to store created note id 
+
+   // Channels for Change Data Capture
+   noteChannel = '/data/notes__ChangeEvent';
+   sharingChannel = '/data/sharedNote__ChangeEvent';
+   subscriptions = {};
+
    @wire(CurrentPageReference)
    setCurrentPageReference(pageRef) {
       const newObjectId = pageRef?.attributes?.recordId;
@@ -26,6 +35,78 @@ export default class StickyNotes extends LightningElement {
          this.objectId = newObjectId;
       }
       this.fetchNotes();
+      this.subscribeToCDC(this.noteChannel);
+      this.subscribeToCDC(this.sharingChannel);
+
+   }
+
+
+   disconnectedCallback() {
+      this.unsubscribeFromCDC(this.noteChannel);
+   }
+
+   get stickyNotes() {
+      return this._stickyNotes;
+   }
+
+   set stickyNotes(value) {
+      this._stickyNotes = value;
+   }
+
+
+   subscribeToCDC(channel) {
+      subscribe(channel, -1, (message) => {
+
+         this.handleCDCEvent(channel, message);
+      }).then((response) => {
+         this.subscriptions[channel] = response;
+         console.log(`Subscribed to ${channel} successfully:`, response);
+      }).catch((error) => {
+         console.error(`Error subscribing to ${channel}:`, error);
+      });
+
+   }
+
+   unsubscribeFromCDC(channel) {
+      if (!this.subscriptions[channel]) {
+         console.warn(`No subscription found for channel: ${channel}`);
+         return;
+      }
+      console.log("Unsubscribing from channel:", channel, this.subscriptions[channel]);
+      unsubscribe(this.subscriptions[channel], (response) => {
+         console.log(`Unsubscribed from ${channel} successfully:`, response);
+      })
+         .catch((error) => {
+            console.error(`Error unsubscribing from ${channel}:`, error);
+         });
+   }
+
+
+   // Handle CDC events based on the channel
+   handleCDCEvent(channel, message) {
+      const { data } = message;
+      const changeType = data?.payload?.ChangeEventHeader?.changeType;
+
+      if (channel === this.noteChannel) {
+         this.handleNoteChangeEvent(data, changeType);
+      } else if (channel === this.sharingChannel) {
+         this.handleSharingChangeEvent(data, changeType);
+      }
+   }
+
+   // Handle Note Change Event
+   handleNoteChangeEvent(data, changeType) {
+      if (changeType === 'UPDATE') {
+         this.fetchNotes();
+      }
+   }
+
+   // Handle Sharing Change Event
+   handleSharingChangeEvent(data, changeType) {
+      if (changeType === 'CREATE') {
+         this.fetchNotes();
+         this.showToast('Info', 'A note has been shared with you!', 'info');
+      }
    }
 
    //  Open modal
@@ -41,11 +122,16 @@ export default class StickyNotes extends LightningElement {
    }
 
    closeShareModal() {
+      console.log("close share modal");
       this.isSelectionModal = false;
+      this.unsubscribeFromCDC(this.sharingChannel);
+
    }
 
    // Close modal
+
    async closeModal(event) {
+
       const { Id, title } = event.detail;
       this.isModalOpen = false;
       this.isUpdate = false;
@@ -61,17 +147,13 @@ export default class StickyNotes extends LightningElement {
 
    // Fetch notes from Apex
    fetchNotes() {
-      this.isLoading = true;
       getNotes({ objectId: this.objectId })
          .then((data) => {
             this.stickyNotes = data;
-            this.isLoading = false;
 
          })
          .catch((error) => {
             this.showToast('Error', 'Failed to retrieve notes: ' + error?.body?.message, 'error');
-            this.isLoading = false;
-
          });
    }
 

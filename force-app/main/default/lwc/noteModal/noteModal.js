@@ -1,6 +1,7 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CurrentPageReference } from 'lightning/navigation';
+import { subscribe, unsubscribe, onError, setDebugFlag } from 'lightning/empApi';
 
 import getColors from '@salesforce/apex/Color.getColors';
 
@@ -24,6 +25,8 @@ export default class NoteModal extends LightningElement {
    autoSaveInterval  //set interval
    tickTime
    colors = []
+   channelName = '/event/NoteUpdateEvent__e';
+   subscription = null;
 
 
    @wire(CurrentPageReference) currentPageReference;
@@ -33,8 +36,19 @@ export default class NoteModal extends LightningElement {
       this.handleActiveColor()
    }
 
+   subscribeToEvent() {
+      subscribe(this.channelName, -1, (message) => {
+         console.log('New note update event received:', message);
+         this.handleNoteUpdate(message.data.payload);
+      }).then((response) => {
+         this.subscription = response;
+         console.log('Subscribed to channel:', this.channelName);
+      });
+   }
+
    connectedCallback() {
 
+      this.subscribeToEvent();
       this.getColorsHandler();
       const { title } = this.note;
       this.activeColor = this.note.color || this.colors[0]?.code;
@@ -47,6 +61,21 @@ export default class NoteModal extends LightningElement {
       } else {
          this.objectId = this.currentPageReference?.attributes?.recordId;
       }
+   }
+
+   disconnectedCallback() {
+      unsubscribe(this.subscription, (response) => {
+         console.log('Unsubscribed from channel:', response);
+      });
+   }
+
+   handleNoteUpdate(payload) {
+
+      this.noteTitle = payload.Title__c || this.noteTitle;
+      this.noteDescription = payload.Content__c || this.noteDescription;
+      this.color = payload.Color__c || this.color;
+      this.activeColor = this.color;
+      this.handleActiveColor();
    }
 
    handleActiveColor() {

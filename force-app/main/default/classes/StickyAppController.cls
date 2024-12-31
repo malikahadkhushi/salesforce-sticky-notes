@@ -152,6 +152,18 @@ public with sharing class StickyAppController {
             noteToUpdate.ObjectId__c = objectId;
             noteToUpdate.Color_Code__c = code ;
             update noteToUpdate;
+
+            // Publish Platform Event
+            NoteUpdateEvent__e event = new NoteUpdateEvent__e(
+                NoteId__c = noteToUpdate.Id,
+                Title__c = noteToUpdate.Title__c,
+                Content__c = noteToUpdate.Content__c,
+                ObjectId__c = noteToUpdate.ObjectId__c,
+                ColorCode__c = noteToUpdate.Color_Code__c
+            );
+
+            EventBus.publish(event);
+            System.debug('Event published: ' + event);
             return noteToUpdate;
         } catch (Exception e) {
             throw new AuraHandledException('Error updating note: ' + e.getMessage());
@@ -163,10 +175,10 @@ public with sharing class StickyAppController {
     public static void deleteNote(Id Id) {
         try {
             Id ownerId = UserInfo.getUserId();
-            SharedNote__c sharedNote = [SELECT Id FROM SharedNote__c WHERE Note__c = :Id AND User__c = :ownerId];
+            List<SharedNote__c> sharedNotes = [SELECT Id FROM SharedNote__c WHERE Note__c = :Id AND User__c = :ownerId];
             Notes__c record= [SELECT Id FROM Notes__c WHERE Id = :Id];
-            if(sharedNote != null){
-                delete sharedNote;
+            if(sharedNotes.size() > 0){
+                delete sharedNotes;
             }else{
                 delete record;
             }
@@ -178,8 +190,8 @@ public with sharing class StickyAppController {
     @AuraEnabled
     public static List<User> getUsers(){
         try {
+            
         Id ownerId = UserInfo.getUserId();
-
         Map<Id, String> profileToLicenseMap = new Map<Id, String>();
 
         List<Profile> profiles = [
