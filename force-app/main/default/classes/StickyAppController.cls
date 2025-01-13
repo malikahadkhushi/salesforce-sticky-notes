@@ -1,129 +1,86 @@
 public with sharing class StickyAppController {
 
 
-    // Method to retrieve all notes
     @AuraEnabled
-    public static List<Notes__c> getNotes(String objectId) {
-        
+    public static List<Notes__c> getNotes(String objectId, String text) {
         Id ownerId = UserInfo.getUserId();
-
+    
         try {
+            // Base query conditions
+            String searchCondition = '';
+            if (String.isNotBlank(text)) {
+                searchCondition = ' AND (Title__c LIKE \'%' + String.escapeSingleQuotes(text) + '%\')';
+            }
+
+    
             if (String.isNotBlank(objectId)) {
                 // Query owned notes
-                List<Notes__c> ownedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
-                    FROM Notes__c
-                    WHERE OwnerId = :ownerId AND ObjectId__c = :objectId
-                    ORDER BY CreatedDate DESC
-                ];
-            
+                List<Notes__c> ownedNotes = Database.query(
+                    'SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c ' +
+                    'FROM Notes__c ' +
+                    'WHERE OwnerId = :ownerId AND ObjectId__c = :objectId ' + searchCondition +
+                    ' ORDER BY CreatedDate DESC'
+                );
+    
                 // Query shared notes
-                List<Notes__c> sharedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
-                    FROM Notes__c
-                    WHERE Id IN (
-                        SELECT Note__c
-                        FROM SharedNote__c
-                        WHERE User__c = :ownerId
-                    )
-                    AND ObjectId__c = :objectId
-                    ORDER BY CreatedDate DESC
-                ];
-            
+                List<Notes__c> sharedNotes = Database.query(
+                    'SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c ' +
+                    'FROM Notes__c ' +
+                    'WHERE Id IN (SELECT Note__c FROM SharedNote__c WHERE User__c = :ownerId) ' +
+                    'AND ObjectId__c = :objectId ' + searchCondition +
+                    ' ORDER BY CreatedDate DESC'
+                );
+    
                 // Combine results and remove duplicates
-                Set<Id> uniqueNoteIds = new Set<Id>();
-                List<Notes__c> combinedNotes = new List<Notes__c>();
-            
-                for (Notes__c note : ownedNotes) {
-                    if (!uniqueNoteIds.contains(note.Id)) {
-                        uniqueNoteIds.add(note.Id);
-                        combinedNotes.add(note);
-                    }
-                }
-            
-                for (Notes__c note : sharedNotes) {
-                    if (!uniqueNoteIds.contains(note.Id)) {
-                        uniqueNoteIds.add(note.Id);
-                        combinedNotes.add(note);
-                    }
-                }
-
-                return combinedNotes;
-
-
-                //     List<Notes__c> notes = [
-                //     SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c
-                //     FROM Notes__c
-                //     WHERE (OwnerId = :ownerId AND ObjectId__c = :objectId)
-                //     AND Id IN (
-                //         SELECT Note__c
-                //         FROM SharedNote__c
-                //         WHERE User__c = :ownerId
-                //     )
-                //     ORDER BY CreatedDate DESC
-                // ];
-                // return notes;
-            
+                return combineNotes(ownedNotes, sharedNotes);
             } else {
                 // Query owned notes
-                List<Notes__c> ownedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
-                    FROM Notes__c
-                    WHERE OwnerId = :ownerId
-                    ORDER BY CreatedDate DESC
-                ];
-            
+                List<Notes__c> ownedNotes = Database.query(
+                    'SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c ' +
+                    'FROM Notes__c ' +
+                    'WHERE OwnerId = :ownerId ' + searchCondition +
+                    ' ORDER BY CreatedDate DESC'
+                );
+    
                 // Query shared notes
-                List<Notes__c> sharedNotes = [
-                    SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c
-                    FROM Notes__c
-                    WHERE Id IN (
-                        SELECT Note__c
-                        FROM SharedNote__c
-                        WHERE User__c = :ownerId
-                    )
-                    ORDER BY CreatedDate DESC
-                ];
-            
+                List<Notes__c> sharedNotes = Database.query(
+                    'SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c ' +
+                    'FROM Notes__c ' +
+                    'WHERE Id IN (SELECT Note__c FROM SharedNote__c WHERE User__c = :ownerId) ' +
+                    searchCondition +
+                    ' ORDER BY CreatedDate DESC'
+                );
+    
                 // Combine results and remove duplicates
-                Set<Id> uniqueNoteIds = new Set<Id>();
-                List<Notes__c> combinedNotes = new List<Notes__c>();
-            
-                for (Notes__c note : ownedNotes) {
-                    if (!uniqueNoteIds.contains(note.Id)) {
-                        uniqueNoteIds.add(note.Id);
-                        combinedNotes.add(note);
-                    }
-                }
-            
-                for (Notes__c note : sharedNotes) {
-                    if (!uniqueNoteIds.contains(note.Id)) {
-                        uniqueNoteIds.add(note.Id);
-                        combinedNotes.add(note);
-                    }
-                }
-            
-                return combinedNotes;
-                
-                // List<Notes__c> notes = [
-                //     SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c
-                //     FROM Notes__c
-                //     WHERE (OwnerId = :ownerId)
-                //     AND Id IN (
-                //         SELECT Note__c
-                //         FROM SharedNote__c
-                //         WHERE User__c = :ownerId
-                //     )
-                //     ORDER BY CreatedDate DESC
-                // ];
-                // return notes;
+                return combineNotes(ownedNotes, sharedNotes);
             }
-                      
-
         } catch (Exception e) {
             throw new AuraHandledException('Error retrieving notes: ' + e.getMessage());
         }
     }
+    
+    // Helper method to combine notes and remove duplicates
+    private static List<Notes__c> combineNotes(List<Notes__c> ownedNotes, List<Notes__c> sharedNotes) {
+        Set<Id> uniqueNoteIds = new Set<Id>();
+        List<Notes__c> combinedNotes = new List<Notes__c>();
+    
+        for (Notes__c note : ownedNotes) {
+            if (!uniqueNoteIds.contains(note.Id)) {
+                uniqueNoteIds.add(note.Id);
+                combinedNotes.add(note);
+            }
+        }
+    
+        for (Notes__c note : sharedNotes) {
+            if (!uniqueNoteIds.contains(note.Id)) {
+                uniqueNoteIds.add(note.Id);
+                combinedNotes.add(note);
+            }
+        }
+    
+        return combinedNotes;
+    }
+    
     
     // Method to create a new note
     @AuraEnabled
@@ -145,26 +102,17 @@ public with sharing class StickyAppController {
     // Method to update an existing note
     @AuraEnabled
     public static Notes__c updateNote(Id Id, String title, String content, String objectId, String code) {
+
         try {
             Notes__c noteToUpdate = [SELECT Id FROM Notes__c WHERE Id = :Id];
             noteToUpdate.Title__c = title;
             noteToUpdate.Content__c = content;
             noteToUpdate.ObjectId__c = objectId;
-            noteToUpdate.Color_Code__c = code ;
+            noteToUpdate.Color_Code__c = code;
             update noteToUpdate;
 
-            // Publish Platform Event
-            NoteUpdateEvent__e event = new NoteUpdateEvent__e(
-                NoteId__c = noteToUpdate.Id,
-                Title__c = noteToUpdate.Title__c,
-                Content__c = noteToUpdate.Content__c,
-                ObjectId__c = noteToUpdate.ObjectId__c,
-                ColorCode__c = noteToUpdate.Color_Code__c
-            );
-
-            EventBus.publish(event);
-            System.debug('Event published: ' + event);
             return noteToUpdate;
+            
         } catch (Exception e) {
             throw new AuraHandledException('Error updating note: ' + e.getMessage());
         }
@@ -219,7 +167,6 @@ public with sharing class StickyAppController {
                 filterUsers.add(user);
             }
         }
-        System.debug('filterUsers'+filterUsers);
          return filterUsers;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
@@ -245,4 +192,58 @@ public with sharing class StickyAppController {
             throw new AuraHandledException('Error while sharing notes: ' + e.getMessage());
         }
     }   
+
+    @AuraEnabled
+    public static void sendNotificationsToUsers(List<Id> userIds, String noteTitle) {
+        try {
+            // Get the Custom Notification Type Developer Name
+            CustomNotificationType cnType = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'customnotification'];
+            String senderName = Userinfo.getName();
+            String senderId = Userinfo.getUserId();
+    
+                    List<Messaging.CustomNotification> notifications = new List<Messaging.CustomNotification>();
+
+            // Loop through each user ID in the list and send a notification
+            for (Id userId : userIds) {
+
+                Messaging.CustomNotification customNotificationObj = new Messaging.CustomNotification();
+                customNotificationObj.setBody(senderName + ' shared a note "' + noteTitle + '" with you!');
+                customNotificationObj.setTitle('Note shared with you');
+                customNotificationObj.setTargetId(userId); // Send to each user individually
+                customNotificationObj.setNotificationTypeId(cnType.id);
+                customNotificationObj.setSenderId(senderId);
+                
+                // Send the notification to the user
+                customNotificationObj.send(new Set<String> {userId});
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException('Error while sharing notes: ' + e.getMessage());
+        }
+    }
+    
+    
+
+    @AuraEnabled
+    public static void sendEmailsToUsers(List<Id> userIds, String noteTitle) {
+        // Get the current user's name
+        String currentUserName = UserInfo.getName();
+    
+        List<User> users = [SELECT Id, Email FROM User WHERE Id IN :userIds];
+    
+        // Create a list to hold the email messages
+        List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+    
+        // Loop through the users and prepare the emails
+        for (User user : users) {
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            email.setToAddresses(new List<String>{ user.Email });
+            email.setSubject('Note is Shared with you');
+            email.setPlainTextBody(currentUserName + ' shared the note "' + noteTitle + '" with you.');
+            emails.add(email);
+        }
+    
+        // Send the emails
+        Messaging.sendEmail(emails);
+    }
+    
 }

@@ -79,6 +79,22 @@
    border-radius: 0px 0px 5px 5px;
 }
 
+.text-toolbar {
+   display: flex;
+   justify-content: start;
+   gap: 10px;
+   border-top: 0.2px rgba(67, 66, 66, 0.1) solid;
+}
+
+.toolbar-button {
+   display: inline;
+   border: none;
+   background-color: transparent;
+   padding: 2px;
+   cursor: pointer;
+   font-size: 16px;
+   transition: all ease-in-out 0.5s;
+}
 
 .spin {
    animation: spin 1s linear infinite;

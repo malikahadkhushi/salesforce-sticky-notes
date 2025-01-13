@@ -1,0 +1,60 @@
+<apex:page>
+   <apex:outputPanel styleClass="slds-scope">
+      <h1 style="font-size: 24px; color: #2E86C1;">Sticky Notes Package - Post-Deployment Steps</h1>
+      <p style="font-size: 16px; color: #34495E;">Thank you for installing the Sticky Notes package! Please follow the steps below to configure and start using the app:</p>
+
+      <h2 style="font-size: 20px; color: #2874A6; margin-top: 20px;">Post-Deployment Steps</h2>
+      <ol style="font-size: 16px; color: #2C3E50; margin-left: 20px;">
+
+         <li>
+            <strong>Add Colors to Sticky Notes:</strong>
+            <ul>
+               <li>Go to
+                  <em>Setup</em> →
+                  <em>Custom Metadata Types</em> →
+                  <strong>Color_Code</strong>.</li>
+               <li>Click
+                  <strong>Manage Records</strong>.</li>
+               <li>Click
+                  <strong>New</strong> to add a new color.</li>
+               <li>Fill in the details:
+                  <ul>
+                     <li>
+                        <strong>Label:</strong> Enter a name for the color (e.g., "Yellow").</li>
+                     <li>
+                        <strong>Color Code:</strong> Enter the color's HEX code (e.g., "#FFFF00" for yellow).</li>
+                  </ul>
+               </li>
+               <li>Repeat for additional colors if needed.</li>
+            </ul>
+         </li>
+         <li>
+            <strong>Assign Permissions:</strong>
+            <ul>
+               <li>Ensure that users have the appropriate permission set to access and use the Sticky Notes app.</li>
+            </ul>
+         </li>
+      </ol>
+
+      <h2 style="font-size: 20px; color: #2874A6; margin-top: 20px;">Features of the Sticky Notes App</h2>
+      <ul style="font-size: 16px; color: #2C3E50; margin-left: 20px;">
+         <li>
+            <strong>Create Notes:</strong> Users can create new notes to keep track of their tasks and ideas.</li>
+         <li>
+            <strong>Share Notes:</strong> Notes can be shared with other users in the same org. Shared notes are visible to the selected
+            users.
+         </li> 
+         <li>
+            <strong>Edit Notes:</strong> Any changes made to a note will reflect for all users with whom the note is shared.</li>
+         <li>
+            <strong>Delete Notes:</strong> Users can delete notes they no longer need.</li>
+         <li>
+            <strong>Change Note Colors:</strong> Users can change the color of their notes to organize and prioritize them better.</li>
+      </ul>
+
+      <h2 style="font-size: 20px; color: #2874A6; margin-top: 20px;">Need Help?</h2>
+      <p style="font-size: 16px; color: #34495E;">
+         If you encounter any issues or need assistance, please contact your Salesforce administrator or refer to the package documentation.
+      </p>
+   </apex:outputPanel>
+</apex:page>

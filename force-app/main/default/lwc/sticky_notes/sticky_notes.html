@@ -2,7 +2,10 @@
    <div class="note-container">
       <div class="note-header">
          <div>
-            <lightning-button-icon class="create-note-button slds-grid slds-grid_align-end" icon-name="utility:add"
+            <c-note-search onsearch={handleSearchNote}></c-note-search>
+         </div>
+         <div>
+            <lightning-button-icon class="create-note-button slds-grid slds-grid_align-end " icon-name="utility:add"
                alternative-text="Add Note" variant="bare" onclick={openModal}>
             </lightning-button-icon>
          </div>
@@ -32,7 +35,7 @@
 
       <!-- User Selection Modal -->
       <template if:true={isSelectionModal}>
-         <c-user-selection-modal onclose={closeShareModal} note-id={noteId}
+         <c-user-selection-modal onclose={closeShareModal} note-id={noteId} note-title={noteTitle}
             onsharenotes={handleShareNotes}></c-user-selection-modal>
       </template>
 

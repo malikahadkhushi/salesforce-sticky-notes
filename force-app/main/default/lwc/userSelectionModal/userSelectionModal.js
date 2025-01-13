@@ -1,14 +1,18 @@
 import { LightningElement, track, api } from 'lwc';
 import getUsers from '@salesforce/apex/StickyAppController.getUsers';
-
+import sendNotificationsToUsers from '@salesforce/apex/StickyAppController.sendNotificationsToUsers';
+import sendEmailsToUsers from '@salesforce/apex/StickyAppController.sendEmailsToUsers';
 export default class UserSelectionModal extends LightningElement {
 
    @track users = [];
    @track selectedUsers = [];
    @track isDisabled = true;
    @track isLoading = false;
+   @track sendNotification = true;
+   @track sendEmail = false;
 
    @api noteId;
+   @api noteTitle
 
 
    connectedCallback() {
@@ -32,6 +36,17 @@ export default class UserSelectionModal extends LightningElement {
 
    }
 
+   handleSendNotificationChange(event) {
+      this.sendNotification = event.target.checked;
+      console.log("this.sendNotification", this.sendNotification);
+   }
+
+   // Handle "Send Email" checkbox change
+   handleSendEmailChange(event) {
+      this.sendEmail = event.target.checked;
+      console.log("this.sendEmail", this.sendEmail);
+   }
+
    // Fetch Users from Apex Controller
    fetchUsers() {
       this.isLoading = true;
@@ -46,7 +61,7 @@ export default class UserSelectionModal extends LightningElement {
          });
    }
 
-   shareNote() {
+   async shareNote() {
 
       const sharedNotes = this.selectedUsers.map((user) => {
          const obj = {
@@ -59,6 +74,34 @@ export default class UserSelectionModal extends LightningElement {
       const sharedNotesEvent = new CustomEvent('sharenotes', {
          detail: sharedNotes
       });
+
+      if (this.sendNotification && this.sendEmail) {
+
+         await sendNotificationsToUsers({
+            userIds: this.selectedUsers,
+            noteTitle: this.noteTitle
+         });
+
+         await sendEmailsToUsers({
+            userIds: this.selectedUsers,
+            noteTitle: this.noteTitle
+         });
+
+      } else if (this.sendNotification) {
+
+         await sendNotificationsToUsers({
+            userIds: this.selectedUsers,
+            noteTitle: this.noteTitle
+         });
+
+      } else if (this.sendEmail) {
+
+         await sendEmailsToUsers({
+            userIds: this.selectedUsers,
+            noteTitle: this.noteTitle
+         });
+
+      }
 
       this.closeModal();
       this.dispatchEvent(sharedNotesEvent);

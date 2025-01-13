@@ -1,20 +1,18 @@
 .card {
    height: 70px;
    width: 290px;
-   /* background-color: #fff9c4; */
-   display: flex;
    border-radius: 3px;
    flex-direction: column;  
    padding: 10px 15px; 
    position: relative;
    cursor: pointer;
-   transition: all ease-in-out 0.6s;
    text-overflow: ellipsis;
    overflow: hidden;
-}
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+   display: inline-block;
+   margin: 2px 0px;
+   transition: transform 0.3s ease, z-index 0.3s ease;
 
-.card:hover{
-   transform: scale(1.03);
 }
 
 .actions {
@@ -53,8 +51,8 @@ transition: opacity 0.3s ease, visibility 0.3s ease;
    width: 100%;
    font-weight: 700;
    white-space: nowrap;
-
 }
+
 .description{
    height: 100%;
    width: 100%;
