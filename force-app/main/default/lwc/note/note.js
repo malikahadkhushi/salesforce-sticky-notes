@@ -7,11 +7,17 @@ export default class Note extends LightningElement {
       return this.note.Color_Code__c;
    }
 
+
    renderedCallback() {
-      // Apply the dynamic background color to the root element
+      // Apply the dynamic background color and tilt effect to the root element
       const noteElement = this.template.querySelector('.card');
       if (noteElement) {
          noteElement.style.backgroundColor = this.backgroundColor;
+
+         // Apply random tilt
+         const randomTilt = Math.random() < 0.5 ? -1 : 1; // Randomly tilt left or right
+         const randomAngle = 2; // Random angle between 0 and 10 degrees
+         noteElement.style.transform = `rotate(${randomTilt * randomAngle}deg)`;
       }
    }
 
@@ -39,7 +45,7 @@ export default class Note extends LightningElement {
 
    handleShare() {
       const shareEvent = new CustomEvent('share', {
-         detail: this.note.Id
+         detail: { Id: this.note.Id,title:this.note.Title__c }
       });
 
       this.dispatchEvent(shareEvent);

@@ -10,8 +10,12 @@
    display:  flex;
    width: 100%;
    justify-content: space-between;
+   align-items: center;
 }
 
+.create-note-button {
+   --slds-c-icon-color-foreground:#0070d2; 
+}
 .heading{
    font-weight: bold;
    font-size: 18px;

@@ -22,6 +22,8 @@ export default class StickyNotes extends LightningElement {
 
    @track objectId;
    @track noteId; // use to store created note id 
+   @track noteTitle = '';
+
 
    // Channels for Change Data Capture
    noteChannel = '/data/notes__ChangeEvent';
@@ -37,7 +39,6 @@ export default class StickyNotes extends LightningElement {
       this.fetchNotes();
       this.subscribeToCDC(this.noteChannel);
       this.subscribeToCDC(this.sharingChannel);
-
    }
 
 
@@ -69,12 +70,9 @@ export default class StickyNotes extends LightningElement {
 
    unsubscribeFromCDC(channel) {
       if (!this.subscriptions[channel]) {
-         console.warn(`No subscription found for channel: ${channel}`);
          return;
       }
-      console.log("Unsubscribing from channel:", channel, this.subscriptions[channel]);
       unsubscribe(this.subscriptions[channel], (response) => {
-         console.log(`Unsubscribed from ${channel} successfully:`, response);
       })
          .catch((error) => {
             console.error(`Error unsubscribing from ${channel}:`, error);
@@ -105,7 +103,6 @@ export default class StickyNotes extends LightningElement {
    handleSharingChangeEvent(data, changeType) {
       if (changeType === 'CREATE') {
          this.fetchNotes();
-         this.showToast('Info', 'A note has been shared with you!', 'info');
       }
    }
 
@@ -116,8 +113,9 @@ export default class StickyNotes extends LightningElement {
    }
 
    openShareModal(event) {
-      const Id = event.detail;
-      this.noteId = Id;
+      const note = event.detail;
+      this.noteId = note.Id;
+      this.noteTitle = note.title;
       this.isSelectionModal = true;
    }
 
@@ -146,8 +144,8 @@ export default class StickyNotes extends LightningElement {
    }
 
    // Fetch notes from Apex
-   fetchNotes() {
-      getNotes({ objectId: this.objectId })
+   fetchNotes(text = '') {
+      getNotes({ objectId: this.objectId, text: text })
          .then((data) => {
             this.stickyNotes = data;
 
@@ -248,6 +246,17 @@ export default class StickyNotes extends LightningElement {
          });
       } catch (error) {
          console.log("Error", error);
+      }
+   }
+
+   // search note handler
+   handleSearchNote(event) {
+      const text = event.detail;
+      try {
+         this.fetchNotes(text);
+         console.log("search text in main", text);
+      } catch (error) {
+         console.log('Error in Searching Note', error);
       }
    }
 

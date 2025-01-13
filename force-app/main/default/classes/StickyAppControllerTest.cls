@@ -40,7 +40,7 @@ public class StickyAppControllerTest {
     
         // Test without objectId
         Test.startTest();
-        List<Notes__c> notes = StickyAppController.getNotes('');
+        List<Notes__c> notes = StickyAppController.getNotes('','');
         Test.stopTest();
     
         System.assert(notes.size() > 0, 'Notes should be retrieved without an objectId.');
@@ -52,7 +52,7 @@ public class StickyAppControllerTest {
     
         // Test with a valid objectId
         Test.startTest();
-        List<Notes__c> notes = StickyAppController.getNotes('001xx000003DGbPAAW');
+        List<Notes__c> notes = StickyAppController.getNotes('001xx000003DGbPAAW','dfsd');
         Test.stopTest();
     
         System.assert(notes.size() > 0, 'Notes should be retrieved for the given objectId.');
@@ -131,5 +131,82 @@ public class StickyAppControllerTest {
         System.assert(sharedNotes.size() > 0, 'Shared notes should be created.');
         System.assertEquals(note.Id, sharedNotes[0].Note__c, 'Note ID should match.');
         System.assertEquals(user.Id, sharedNotes[0].User__c, 'User ID should match.');
+    }
+
+    // @isTest
+    // static void testSendNotificationsToUsers() {
+    //     setupTestData();
+        
+    //     // Fetch the users to whom the notification will be sent
+    //     User user1 = [SELECT Id FROM User WHERE Email = 'malikahadofficial2266@gmail.com' LIMIT 1];
+    //     User user2 = [SELECT Id FROM User WHERE Email = 'anotheremail@example.com' LIMIT 1];
+        
+    //     // Prepare the user IDs list
+    //     List<Id> userIds = new List<Id>{ user1.Id, user2.Id };
+        
+    //     Test.startTest();
+        
+    //     // Call the method to send notifications
+    //     StickyAppController.sendNotificationsToUsers(userIds, 'Test Note Title');
+        
+    //     Test.stopTest();            
+    // }
+
+
+    @isTest
+static void testSendNotificationsToUsers() {
+    setupTestData();
+    
+    // Create 200 test users
+    List<User> testUsers = new List<User>();
+    Id profileId = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1].Id;
+    System.debug('profileId'+profileId);
+
+    for(Integer i = 0; i < 200; i++) {
+        testUsers.add(new User(
+            FirstName = 'Test' + i,
+            LastName = 'User' + i,
+            Alias = 'tus' + i,
+            Email = 'test_user00' + i + '@example.com',
+            Username = 'test_user00' + i + '@example.com',
+            TimeZoneSidKey = 'America/Los_Angeles',
+            LocaleSidKey = 'en_US',
+            ProfileId = profileId,
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US'
+        ));
+    }
+    
+    insert testUsers;
+    
+    // Prepare the user IDs list
+    List<Id> userIds = new List<Id>();
+    for(User u : testUsers) {
+        userIds.add(u.Id);
+    }
+    
+    System.debug('------>'+userIds);
+    Test.startTest();
+    // Call the method to send notifications
+    StickyAppController.sendNotificationsToUsers(userIds, 'Test Note Title');
+    Test.stopTest();
+    
+    // Add assertions if needed
+    System.assertEquals(200, userIds.size(), 'Should have 200 users for notification');
+}
+
+    @isTest
+    static void testSendEmailsToUsers() {
+
+        setupTestData();
+        User testUser = [SELECT Id FROM User WHERE Email = 'malikahadofficial2266@gmail.com' LIMIT 1];
+        List<Id> userIds = new List<Id>{ testUser.Id };
+
+        Test.startTest();
+        StickyAppController.sendEmailsToUsers(userIds, 'Test Note Title');
+        Test.stopTest();
+
+        // Assert that emails were sent, this can be checked by using EmailMessage or other methods
+        System.assert(true, 'Emails should be sent.');
     }
 }

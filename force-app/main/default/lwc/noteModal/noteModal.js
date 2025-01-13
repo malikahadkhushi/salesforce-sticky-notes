@@ -21,10 +21,11 @@ export default class NoteModal extends LightningElement {
    @track isSaved = false;
    @track color;
    @track activeColor;
+   @track colors = []
+
 
    autoSaveInterval  //set interval
    tickTime
-   colors = []
    channelName = '/event/NoteUpdateEvent__e';
    subscription = null;
 
@@ -38,7 +39,6 @@ export default class NoteModal extends LightningElement {
 
    subscribeToEvent() {
       subscribe(this.channelName, -1, (message) => {
-         console.log('New note update event received:', message);
          this.handleNoteUpdate(message.data.payload);
       }).then((response) => {
          this.subscription = response;
@@ -48,10 +48,13 @@ export default class NoteModal extends LightningElement {
 
    connectedCallback() {
 
-      this.subscribeToEvent();
+      if (Object.keys(this.note).length) {
+         this.subscribeToEvent();
+      }
+
       this.getColorsHandler();
       const { title } = this.note;
-      this.activeColor = this.note.color || this.colors[0]?.code;
+
       if (title) {
          this.noteTitle = this.note.title || '';
          this.noteDescription = this.note.content || '';
@@ -76,20 +79,20 @@ export default class NoteModal extends LightningElement {
       this.color = payload.Color__c || this.color;
       this.activeColor = this.color;
       this.handleActiveColor();
+
    }
 
    handleActiveColor() {
 
       const colorBoxes = this.template.querySelectorAll('.color-box');
       const noteContainer = this.template.querySelector('.note-container');
-
       // Default to the first color if activeColor is not set
-      const defaultColor = this.colors[0]?.code;
-      const activeColor = this.activeColor || defaultColor;
+      const activeColor = this.activeColor || this.color;
 
       colorBoxes.forEach((box, index) => {
 
          const color = this.colors[index].code;
+
          // Apply styles to each color box
          box.style.backgroundColor = color;
          box.style.width = '13px';
@@ -133,6 +136,70 @@ export default class NoteModal extends LightningElement {
       }, 2000);
    }
 
+   applyBold() {
+      this.formatText('bold');
+   }
+
+   applyItalic() {
+      this.formatText('italic');
+   }
+
+   applyUnderline() {
+      this.formatText('underline');
+   }
+
+   applyStrike() {
+      this.formatText('line-through');
+   }
+
+   formatText(style) {
+      const textarea = this.template.querySelector('.note-textarea');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      if (start === end) {
+         // No text is selected, do nothing
+         return;
+      }
+
+      const text = textarea.value;
+      const selectedText = text.substring(start, end);
+
+      // Apply the selected style
+      let wrappedText;
+      switch (style) {
+         case 'bold':
+            wrappedText = `<b>${selectedText}</b>`; // HTML bold
+            break;
+         case 'italic':
+            wrappedText = `<i>${selectedText}</i>`; // HTML italic
+            break;
+         case 'underline':
+            wrappedText = `<u>${selectedText}</u>`; // HTML underline
+            break;
+         case 'line-through':
+            wrappedText = `<strike>${selectedText}</strike>`; // HTML strike-through
+            break;
+      }
+
+      // Replace the selected text with the formatted text
+      textarea.value = text.substring(0, start) + wrappedText + text.substring(end);
+
+      // Update the description value to reflect the changes
+      this.noteDescription = textarea.value;
+
+      // Reset the cursor position
+      textarea.setSelectionRange(start, start + wrappedText.length);
+      textarea.focus();
+
+      // If you want to render the formatted text in another element, you can use innerHTML
+      const outputElement = this.template.querySelector('.note-textarea');
+      if (outputElement) {
+         outputElement.innerHTML = this.noteDescription; // Render formatted text as HTML
+      }
+   }
+
+
    handleClose() {
 
       this.dispatchEvent(new CustomEvent('close', {
@@ -164,13 +231,12 @@ export default class NoteModal extends LightningElement {
          clearTimeout(this.autoSaveTimeout);
       }
 
-
       this.autoSaveTimeout = setTimeout(() => {
          this.dispatchEvent(new CustomEvent('save', {
             detail: {
                title: this.noteTitle,
                description: this.noteDescription,
-               code: this.color || this.colors[0].code,
+               code: this.color || this.activeColor,
                objectId: (this.objectId && this.isObject) ? this.objectId : ''
             }
          }));
@@ -216,9 +282,10 @@ export default class NoteModal extends LightningElement {
 
    async getColorsHandler() {
       try {
+
          const response = await getColors();
          this.colors = response;
-
+         this.activeColor = this.note.color || this.colors[Math.floor(Math.random() * this.colors.length)]?.code;
          const color = response.find((color) => color.code == this.note.color);
          this.color = color?.code;
 
