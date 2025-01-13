@@ -5,13 +5,13 @@ public with sharing class StickyAppController {
     public static List<Notes__c> getNotes(String objectId, String text) {
         Id ownerId = UserInfo.getUserId();
     
+    
         try {
             // Base query conditions
             String searchCondition = '';
             if (String.isNotBlank(text)) {
                 searchCondition = ' AND (Title__c LIKE \'%' + String.escapeSingleQuotes(text) + '%\')';
             }
-
     
             if (String.isNotBlank(objectId)) {
                 // Query owned notes
@@ -111,7 +111,18 @@ public with sharing class StickyAppController {
             noteToUpdate.Color_Code__c = code;
             update noteToUpdate;
 
+            // // Publish Platform Event
+            // NoteUpdateEvent__e event = new NoteUpdateEvent__e(
+            //     NoteId__c = noteToUpdate.Id,
+            //     Title__c = noteToUpdate.Title__c,
+            //     Content__c = noteToUpdate.Content__c,
+            //     ObjectId__c = noteToUpdate.ObjectId__c,
+            //     ColorCode__c = noteToUpdate.Color_Code__c
+            // );
+
+            // EventBus.publish(event);
             return noteToUpdate;
+            
             
         } catch (Exception e) {
             throw new AuraHandledException('Error updating note: ' + e.getMessage());
@@ -245,5 +256,4 @@ public with sharing class StickyAppController {
         // Send the emails
         Messaging.sendEmail(emails);
     }
-    
 }
