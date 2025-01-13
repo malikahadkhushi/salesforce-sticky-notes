@@ -17,7 +17,7 @@ export default class StickyNotes extends LightningElement {
    @track isUpdate = false;
    @track isLoading = false;
    @track note = {};
-
+   @track objectName = '';
 
 
    @track objectId;
@@ -120,7 +120,6 @@ export default class StickyNotes extends LightningElement {
    }
 
    closeShareModal() {
-      console.log("close share modal");
       this.isSelectionModal = false;
       this.unsubscribeFromCDC(this.sharingChannel);
 
@@ -145,7 +144,7 @@ export default class StickyNotes extends LightningElement {
 
    // Fetch notes from Apex
    fetchNotes(text = '') {
-      getNotes({ objectId: this.objectId, text: text })
+      getNotes({ objectId: this.objectId, text: text, objectName: this.objectName })
          .then((data) => {
             this.stickyNotes = data;
 
@@ -157,7 +156,7 @@ export default class StickyNotes extends LightningElement {
 
    async createNoteHandler() {
       try {
-         const note = await createNote({ title: "", content: "", objectId: this.objectId || "", code: "#ffeaa7" });
+         const note = await createNote({ title: "", content: "", objectId: this.objectId || "", code: "#ffeaa7", objectName: this.objectName });
          this.noteId = note.Id;
       } catch (error) {
          console.log("Error", error?.message,);
@@ -178,10 +177,10 @@ export default class StickyNotes extends LightningElement {
 
    // Save note on input after some time interval
    async handleSaveNote(event) {
-      const { title, description, objectId, code } = event.detail;
+      const { title, description, objectId, code, objectName } = event.detail;
       try {
          if (this.isUpdate || title || description) {
-            await updateNote({ Id: this.noteId || this.note.Id, title, content: description, objectId, code });
+            await updateNote({ Id: this.noteId || this.note.Id, title, content: description, objectId, code, objectName });
          }
       } catch (error) {
          this.showToast('Error', 'Failed to update note: ' + error?.body?.message, 'error');

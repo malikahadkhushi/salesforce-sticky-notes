@@ -182,7 +182,6 @@ static void testSendNotificationsToUsers() {
         userIds.add(u.Id);
     }
     
-    System.debug('------>'+userIds);
     Test.startTest();
     // Call the method to send notifications
     StickyAppController.sendNotificationsToUsers(userIds, 'Test Note Title');

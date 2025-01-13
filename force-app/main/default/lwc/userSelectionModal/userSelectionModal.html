@@ -10,26 +10,43 @@
             </button>
          </header>
 
-         <div class="slds-p-top_small">
-            <template if:false={users.length}>
-               <p>No users found</p>
-            </template>
-            <template for:each={users} for:item=user>
-               <div key={user.Id} class="slds-grid slds-grid_vertical-align-center user-item">
-                  <lightning-input type="checkbox" label={user.Name} value={user.Id}
-                     onchange={handleCheckboxChange}></lightning-input>
-               </div>
-            </template>
+         <div class="sub-container">
+            <div class="slds-p-top_small">
+               <template if:false={users.length}>
+                  <p>No users found</p>
+               </template>
+               <template for:each={users} for:item=user>
+                  <div key={user.Id} class="slds-grid slds-grid_vertical-align-center user-item">
+                     <lightning-input type="checkbox" label={user.Name} value={user.Id}
+                        onchange={handleCheckboxChange}></lightning-input>
+                  </div>
+               </template>
+            </div>
          </div>
 
-         <div class="slds-p-top_small" style="display: flex;">
-            <lightning-input type="checkbox" label="Send Notification" checked={sendNotification}
-               onchange={handleSendNotificationChange}></lightning-input>
-            <lightning-input type="checkbox" label="Send Email" checked={sendEmail}
-               onchange={handleSendEmailChange}></lightning-input>
-         </div>
 
          <footer class="footer">
+
+
+            <div class="slds-p-top_xx-small slds-p-bottom_small" style="display: flex;">
+               <lightning-input class="custom-label" type="checkbox" label="Send Notification"
+                  checked={sendNotification} onchange={handleSendNotificationChange}></lightning-input>
+               <lightning-input class="custom-label" style="font-size: 12px;" type="checkbox" label="Send Email"
+                  checked={sendEmail} onchange={handleSendEmailChange}></lightning-input>
+            </div>
+            <!-- 
+            <div style="padding-top: 2px; padding-bottom: 8px; display: flex; justify-content: center; width: 100%;">
+               <label style="font-size: 14px; margin-right: 10px;" class="custom-label">
+                  <input type="checkbox" checked={sendNotification} onchange={handleSendNotificationChange}>
+                  Send Notification
+               </label>
+               <label style="font-size: 12px; margin-left: 20px;" class="custom-label">
+                  <input type="checkbox" checked={sendEmail} onchange={handleSendEmailChange}>
+                  Send Email
+               </label>
+            </div> -->
+
+
             <lightning-button variant="brand" label="Share" disabled={isDisabled}
                onclick={shareNote}></lightning-button>
          </footer>

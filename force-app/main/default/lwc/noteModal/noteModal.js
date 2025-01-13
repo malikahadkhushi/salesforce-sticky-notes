@@ -19,6 +19,7 @@ export default class NoteModal extends LightningElement {
    @track isAllFill = true; //to check either required fields are filled or note
    @track isSaving = false;  // to check is note saving 
    @track isSaved = false;
+   @track objectName = '';
    @track color;
    @track activeColor;
    @track colors = []
@@ -31,6 +32,8 @@ export default class NoteModal extends LightningElement {
 
 
    @wire(CurrentPageReference) currentPageReference;
+
+
 
    // show colors list for notes
    renderedCallback() {
@@ -55,15 +58,19 @@ export default class NoteModal extends LightningElement {
       this.getColorsHandler();
       const { title } = this.note;
 
+      console.log("this.currentPageReference", this.currentPageReference);
       if (title) {
          this.noteTitle = this.note.title || '';
          this.noteDescription = this.note.content || '';
-         this.objectId = this.note?.objectId;
+         this.objectId = this.note?.objectId || this.currentPageReference?.attributes?.recordId;
          this.isObject = !!this.note?.objectId;
+         this.objectName = this.note?.objectName || this.currentPageReference?.attributes?.objectApiName;
          this.isAllFill = false;
       } else {
          this.objectId = this.currentPageReference?.attributes?.recordId;
+         this.objectName = this.currentPageReference?.attributes?.objectApiName;
       }
+
    }
 
    disconnectedCallback() {
@@ -136,69 +143,6 @@ export default class NoteModal extends LightningElement {
       }, 2000);
    }
 
-   applyBold() {
-      this.formatText('bold');
-   }
-
-   applyItalic() {
-      this.formatText('italic');
-   }
-
-   applyUnderline() {
-      this.formatText('underline');
-   }
-
-   applyStrike() {
-      this.formatText('line-through');
-   }
-
-   formatText(style) {
-      const textarea = this.template.querySelector('.note-textarea');
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-
-      if (start === end) {
-         // No text is selected, do nothing
-         return;
-      }
-
-      const text = textarea.value;
-      const selectedText = text.substring(start, end);
-
-      // Apply the selected style
-      let wrappedText;
-      switch (style) {
-         case 'bold':
-            wrappedText = `<b>${selectedText}</b>`; // HTML bold
-            break;
-         case 'italic':
-            wrappedText = `<i>${selectedText}</i>`; // HTML italic
-            break;
-         case 'underline':
-            wrappedText = `<u>${selectedText}</u>`; // HTML underline
-            break;
-         case 'line-through':
-            wrappedText = `<strike>${selectedText}</strike>`; // HTML strike-through
-            break;
-      }
-
-      // Replace the selected text with the formatted text
-      textarea.value = text.substring(0, start) + wrappedText + text.substring(end);
-
-      // Update the description value to reflect the changes
-      this.noteDescription = textarea.value;
-
-      // Reset the cursor position
-      textarea.setSelectionRange(start, start + wrappedText.length);
-      textarea.focus();
-
-      // If you want to render the formatted text in another element, you can use innerHTML
-      const outputElement = this.template.querySelector('.note-textarea');
-      if (outputElement) {
-         outputElement.innerHTML = this.noteDescription; // Render formatted text as HTML
-      }
-   }
-
 
    handleClose() {
 
@@ -214,6 +158,7 @@ export default class NoteModal extends LightningElement {
       this.objectId = null
       this.isObject = false;
       this.note = {};
+      this.objectName = '';
    }
 
    handleSave() {
@@ -237,7 +182,8 @@ export default class NoteModal extends LightningElement {
                title: this.noteTitle,
                description: this.noteDescription,
                code: this.color || this.activeColor,
-               objectId: (this.objectId && this.isObject) ? this.objectId : ''
+               objectId: (this.objectId && this.isObject) ? this.objectId : '',
+               objectName: this.objectName
             }
          }));
 
@@ -270,7 +216,8 @@ export default class NoteModal extends LightningElement {
             title: this.noteTitle,
             description: this.noteDescription,
             code: selectedColor,
-            objectId: (this.objectId && this.isObject) ? this.objectId : ''
+            objectId: (this.objectId && this.isObject) ? this.objectId : '',
+            objectName: this.objectName
          }
       }));
    }

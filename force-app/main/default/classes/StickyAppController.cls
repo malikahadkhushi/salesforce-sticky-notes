@@ -18,7 +18,7 @@ public with sharing class StickyAppController {
                 List<Notes__c> ownedNotes = Database.query(
                     'SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c ' +
                     'FROM Notes__c ' +
-                    'WHERE OwnerId = :ownerId AND ObjectId__c = :objectId ' + searchCondition +
+                    'WHERE OwnerId = :ownerId ' + searchCondition +
                     ' ORDER BY CreatedDate DESC'
                 );
     
@@ -38,7 +38,7 @@ public with sharing class StickyAppController {
                 List<Notes__c> ownedNotes = Database.query(
                     'SELECT Id, Title__c, Content__c, OwnerId, CreatedDate, ObjectId__c,Color_Code__c ' +
                     'FROM Notes__c ' +
-                    'WHERE OwnerId = :ownerId ' + searchCondition +
+                    'WHERE OwnerId = :ownerId AND ObjectId__c = null ' + searchCondition +
                     ' ORDER BY CreatedDate DESC'
                 );
     

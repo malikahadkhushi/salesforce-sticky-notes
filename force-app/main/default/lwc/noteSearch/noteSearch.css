@@ -1,0 +1,11 @@
+.slds-input {
+    width: 120%;
+    border: none;
+    outline: none;
+}
+
+.slds-input:focus {
+   border: none !important;
+   box-shadow: none !important;
+   outline: none !important;
+}
